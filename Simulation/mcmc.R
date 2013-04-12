@@ -4,6 +4,8 @@
 # l <- t(apply(k, 1, cumsum))
 
 # This function will take a transition matrix and simulate the "walk" through it.
+# The transtion matrix should not be the nominal probability but the cumulative.
+# Please refer to the creation of matrix l in the example above.
 # The return matrix is a count on how many steps were taken in each position. 
 mcmc <- function(size, mat) {
 #size = number of runs, mat = trasition matrix 
