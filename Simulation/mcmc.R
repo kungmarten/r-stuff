@@ -7,28 +7,29 @@
 # The transtion matrix should not be the nominal probability but the cumulative.
 # Please refer to the creation of matrix l in the example above.
 # The return matrix is a count on how many steps were taken in each position. 
+  
 mcmc <- function(size, mat) {
 #size = number of runs, mat = trasition matrix 
-  mcmci <- function(size, stpos, mat, rar) {
-    loop <- function(r, stpos, k) {
-      if (r <= mat[stpos, k]) {
-	    return(k)
-	    }
-	  else loop(r, stpos, k + 1)
+  loop <- function(r, stpos, k) {
+    if (r <= mat[stpos, k]) {
+	  return(k)
 	  }
-    if (size <= 0) return(rar)
-    else {
+	else loop(r, stpos, k + 1)
+	}
+  rar <- matrix(replicate(nrow(mat)^2, 0), nrow(mat))
+  i <- 1
+  stpos <- 1
+  
+  while (i <= size) {
     rnd <- runif(1)
     f <- loop(rnd, stpos, 1)
     trar <- matrix(replicate(nrow(mat)^2, 0), nrow(mat))  
     trar[stpos, f] <- 1
     rar <- rar + trar
-    mcmci(size-1, f, mat, rar)
+	stpos <- f
+    i <- i + 1
     }
-  }
-  rar <- matrix(replicate(nrow(mat)^2, 0), nrow(mat))
-  a <- mcmci(size, 1, mat, rar)
-  return(a)
+  return(rar)
 }
 
   
