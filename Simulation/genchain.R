@@ -1,39 +1,28 @@
-genchain <- function(udf, i, rows, mdf) {
-  if (i >= rows) {
-    return(mdf)
+# Prep data for the transition matrix, i.e. add a start and finish for each session.
+
+genchain <- function(udf) {
+  mdf <- data.frame(t(rep(NA, ncol(udf))))
+  names(mdf) <- names(udf)
+  mdf <- mdf[-1, ]
+  i <- 2
+  rows <- nrow(udf)
+  k <- rbind(data.frame(iUserId = udf[i, 1], RNo = 0, vDesc = "Start"), udf[i, ])
+  mdf <- k
+    
+  while( i < rows) {
+    #if the next user differs from the current, i.e. inactivity.
+    if (udf[i, 1] != udf[(i+1), 1]) {
+	  k <- rbind(udf[i, ], data.frame(iUserId = udf[i, 1], RNo = udf[i, 2] + 1, vDesc = "Inactive"),  data.frame(iUserId = udf[i, 1], RNo = udf[i, 2] + 2, vDesc = "Inactive"))
+	  k <- rbind(k, data.frame(iUserId = udf[(i+1), 1], RNo = 0, vDesc = "Start"))
+	  mdf <- rbind(mdf, k)
 	}
-  else {
-    if(i == 1) {
-      mdf <- rbind(data.frame(id = udf[i, 1], row_number = 0, days_until = 0, vDesc = "Start"), udf[i, ])
-  	}
-    else if((udf[i, 1] != udf[i-1, 1]) && (udf[i, 3] < 6)) { 
-      k <- rbind(data.frame(id = udf[i, 1], row_number = 0, days_until = 0, vDesc = "Start"), udf[i, ])
-      mdf <- rbind(mdf, k)
-	  }
-    else if((udf[i, 1] != udf[i-1, 1]) && (udf[i, 3] >= 6)) {
-      if(udf[i, 1] == udf[i+1, 1]) {
-	    meanrow_number <- ((udf[i, 2] + udf[i+1, 2])/2 )
-		}
-	  else {
-	    meanrow_number <- (udf[i, 2]+1)
-	    }
-      k <- rbind(data.frame(id = udf[i, 1], row_number = 0, days_until = 0, vDesc = "Start"), udf[i, ])
-	  k <- rbind(k, data.frame(id = udf[i, 1], row_number = meanrow_number, days_until = 0, vDesc = "Inactive"))
-      mdf <- rbind(mdf, k)
-	  }
-    else if(udf[i, 3] >= 6) {
-      if(udf[i, 1] == udf[i+1, 1]) {
-	    meanrow_number <- ((udf[i, 2] + udf[i+1, 2])/2 )
-		}
-	  else {
-	    meanrow_number <- (udf[i, 2]+1)
-	    }
-      k <- rbind(udf[i, ], data.frame(id = udf[i, 1], row_number = meanrow_number, days_until = 0, vDesc = "Inactive"))
-      mdf <- rbind(mdf, k)
-	  }	  
+	# If the user neither starts nor goes to inactivity
     else {
       mdf <- rbind(mdf, udf[i, ])
 	  }
-    genchain(udf, i+1, rows, mdf)  
+	i <- i + 1
   }
+  k <- rbind(udf[i, ], data.frame(iUserId = udf[i, 1], RNo = udf[i, 2] + 1, vDesc = "Inactive"),  data.frame(iUserId = udf[i, 1], RNo = udf[i, 2] + 2, vDesc = "Inactive"))
+  mdf <- rbind(mdf, k)
+  return(mdf)
 }
