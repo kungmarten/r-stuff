@@ -73,6 +73,10 @@ events$NextEvent <- factor(events$NextEvent,
 
 trmat <- table(events$iEventId, events$NextEvent)
 
+# We know that 1/3 return to the start
+trmat[1, 1] = 3
+trmat[1, 2] = 1
+
 pagemat <- trmat/rowSums(trmat)
 pagemat <- t(pagemat)
 
@@ -85,7 +89,7 @@ cc = length(trmat)
 rankpoint = 1
 
 # Create empty matrix
-inacmat <- zeros(size(trmat, 1), size(trmat, 2))
+inacmat <- matrix(replicate(nrow(trmat)^2, 0), nrow(trmat))  
 
 while (cc > 0) {
    nmat = trmat
